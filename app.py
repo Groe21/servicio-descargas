@@ -81,6 +81,20 @@ def search():
         if not query:
             return jsonify({'error': 'Query vacío'}), 400
         
+        # Crear cookies file si está disponible en variables de entorno
+        cookies_file = None
+        youtube_cookies = os.environ.get('YOUTUBE_COOKIES', '')
+        
+        if youtube_cookies:
+            temp_id = f"{int(time.time())}_{random.randint(1000, 9999)}"
+            cookies_file = f'{TEMP_DIR}/search_cookies_{temp_id}.txt'
+            try:
+                with open(cookies_file, 'w') as f:
+                    f.write(youtube_cookies)
+            except Exception as e:
+                print(f"Error escribiendo cookies para búsqueda: {e}")
+                cookies_file = None
+        
         # Opciones de búsqueda con yt-dlp
         ydl_opts = {
             'quiet': True,
@@ -97,6 +111,10 @@ def search():
                 'Accept-Encoding': 'gzip, deflate, br',
             },
         }
+        
+        # Agregar cookies si están disponibles
+        if cookies_file:
+            ydl_opts['cookiefile'] = cookies_file
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # Buscar en YouTube
@@ -131,6 +149,13 @@ def search():
     
     except Exception as e:
         return jsonify({'error': f'Error en búsqueda: {str(e)}'}), 500
+    finally:
+        # Limpiar archivo de cookies si existe
+        if 'cookies_file' in locals() and cookies_file and os.path.exists(cookies_file):
+            try:
+                os.remove(cookies_file)
+            except:
+                pass
 
 
 @app.route('/api/download', methods=['POST'])
