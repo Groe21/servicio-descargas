@@ -1,0 +1,148 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│      🚂 YOUTUBE MP3 DOWNLOADER - RAILWAY READY 🚂          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+✅ ARCHIVOS CONFIGURADOS PARA RAILWAY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 Procfile               → Define comando de inicio
+📄 railway.json           → Configuración Railway
+📄 runtime.txt            → Python 3.12
+📄 requirements.txt       → Dependencias actualizadas
+📄 .dockerignore          → Archivos ignorados en build
+📄 .gitignore             → Git ignore actualizado
+📄 app.py                 → Puerto dinámico ($PORT)
+📄 RAILWAY.md             → Guía completa de deploy
+
+🚀 DEPLOY EN 3 PASOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  SUBIR A GITHUB:
+
+    git init
+    git add .
+    git commit -m "YouTube MP3 Downloader - Railway ready"
+    
+    # Crear repo en GitHub, luego:
+    git remote add origin https://github.com/TU-USUARIO/youtube-downloader.git
+    git branch -M main
+    git push -u origin main
+
+2️⃣  CONECTAR RAILWAY:
+
+    • Ve a: https://railway.app
+    • Click "Start a New Project"
+    • Selecciona "Deploy from GitHub repo"
+    • Autoriza y selecciona tu repositorio
+    
+3️⃣  ¡LISTO! 
+
+    Railway desplegará automáticamente
+    URL: https://tu-proyecto.up.railway.app
+
+⚙️  VARIABLES DE ENTORNO (Opcional):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En Railway → Variables:
+
+    DEBUG=False
+    TEMP_DIR=/tmp/youtube_downloads
+
+📦 LO QUE RAILWAY DETECTA AUTOMÁTICAMENTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Python 3.12           → Desde runtime.txt
+✅ Dependencias          → Desde requirements.txt
+✅ Comando de inicio     → Desde Procfile
+✅ Puerto dinámico       → Variable $PORT
+✅ FFmpeg                → Incluido por defecto
+✅ Gunicorn              → Servidor de producción
+
+🎯 CARACTERÍSTICAS LISTAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Puerto dinámico ($PORT)
+✅ Debug desactivable (DEBUG=False)
+✅ Gunicorn con 4 workers
+✅ Timeout de 120 segundos
+✅ Reinicio automático en fallos
+✅ Health check endpoint (/api/health)
+✅ Limpieza automática de archivos
+✅ Headers anti-403 configurados
+
+🌐 DESPUÉS DEL DEPLOY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tu app estará disponible en:
+👉 https://tu-proyecto-xxxxx.up.railway.app
+
+Puedes:
+• Ver logs en tiempo real
+• Asignar dominio personalizado
+• Monitorear CPU/RAM/Red
+• Auto-deploy con cada git push
+
+💡 ALTERNATIVA: RAILWAY CLI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    # Instalar
+    npm i -g @railway/cli
+    
+    # Login
+    railway login
+    
+    # Inicializar
+    railway init
+    
+    # Deploy
+    railway up
+    
+    # Ver logs
+    railway logs
+
+📚 DOCUMENTACIÓN COMPLETA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Lee RAILWAY.md para:
+• Configuración detallada
+• Variables de entorno
+• Troubleshooting
+• Optimizaciones
+• Dominios personalizados
+
+⚠️  IMPORTANTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆓 Plan Gratuito Railway:
+   • $5 de crédito gratis/mes
+   • 500 horas de ejecución
+   • Perfecto para este proyecto
+
+📦 FFmpeg incluido por defecto
+🗑️  Archivos temporales se eliminan automáticamente
+🔒 Rate limiting: 5 descargas/hora
+
+🎉 PROYECTO LISTO PARA PRODUCCIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Estructura final:
+📁 servicio descargas/
+├── 🐍 app.py              (Puerto dinámico ✅)
+├── 📦 requirements.txt    (yt-dlp actualizado ✅)
+├── 🚂 Procfile           (Gunicorn configurado ✅)
+├── ⚙️  railway.json       (Deploy config ✅)
+├── 🐍 runtime.txt        (Python 3.12 ✅)
+├── 🎨 templates/         (Frontend completo ✅)
+├── 💅 static/            (CSS moderno ✅)
+└── 📖 RAILWAY.md         (Guía completa ✅)
+
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│     🚀 ¡LISTO PARA SUBIR A RAILWAY Y COMPARTIR! 🚀        │
+│                                                             │
+│         Sigue los 3 pasos arriba y estarás online          │
+│              en menos de 5 minutos 🎵                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘

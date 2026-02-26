@@ -1,0 +1,27 @@
+[Unit]
+Description=YouTube MP3 Downloader Service
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/home/emilio/Escritorio/desarrollador/servicio descargas
+Environment="PATH=/home/emilio/Escritorio/desarrollador/servicio descargas/venv/bin"
+ExecStart=/home/emilio/Escritorio/desarrollador/servicio descargas/venv/bin/gunicorn \
+    --workers 4 \
+    --bind 0.0.0.0:5000 \
+    --timeout 120 \
+    --access-logfile /var/log/youtube-downloader/access.log \
+    --error-logfile /var/log/youtube-downloader/error.log \
+    app:app
+
+# Reiniciar automáticamente si el servicio falla
+Restart=always
+RestartSec=10
+
+# Límites de recursos
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

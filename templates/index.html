@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube MP3 Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fab fa-youtube"></i>
+                <h1>YouTube MP3 Downloader</h1>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Busca tu canción favorita..."
+                        autocomplete="off"
+                    >
+                    <button class="search-button" onclick="searchVideos()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                </div>
+                <p class="search-hint">Presiona Enter o haz clic en Buscar</p>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+                <p>Buscando música...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <div class="results-header">
+                    <h2>Resultados de búsqueda</h2>
+                    <span id="resultsCount" class="results-count"></span>
+                </div>
+                <div id="resultsGrid" class="results-grid"></div>
+            </section>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-music"></i>
+                <h3>¿Qué música quieres descargar?</h3>
+                <p>Busca tu canción favorita y descárgala en formato MP3</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Download Modal -->
+    <div id="downloadModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="download-spinner"></div>
+                <h3>Descargando y convirtiendo...</h3>
+                <p>Esto puede tomar 20-30 segundos</p>
+                <p class="download-filename" id="downloadFilename"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>YouTube MP3 Downloader - Descarga música sin almacenamiento en servidor</p>
+            <p class="disclaimer">Solo para uso personal. Respeta los derechos de autor.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Variables globales
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        
+        // Inicializar tema
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon();
+
+        // Event listener para Enter en búsqueda
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchVideos();
+            }
+        });
+
+        // Función de búsqueda
+        async function searchVideos() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                showToast('Por favor ingresa un término de búsqueda', 'warning');
+                return;
+            }
+
+            // Mostrar loading
+            showLoading(true);
+            hideElement('resultsSection');
+            hideElement('emptyState');
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error en la búsqueda');
+                }
+
+                showLoading(false);
+                displayResults(data.results);
+            } catch (error) {
+                showLoading(false);
+                showToast('Error al buscar: ' + error.message, 'error');
+                showElement('emptyState');
+            }
+        }
+
+        // Mostrar resultados
+        function displayResults(results) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsCount = document.getElementById('resultsCount');
+
+            if (!results || results.length === 0) {
+                showToast('No se encontraron resultados', 'info');
+                showElement('emptyState');
+                return;
+            }
+
+            resultsCount.textContent = `${results.length} resultados`;
+            resultsGrid.innerHTML = '';
+
+            results.forEach(video => {
+                const card = createVideoCard(video);
+                resultsGrid.appendChild(card);
+            });
+
+            showElement('resultsSection');
+        }
+
+        // Crear card de video
+        function createVideoCard(video) {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            
+            const thumbnail = video.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+            
+            card.innerHTML = `
+                <div class="video-thumbnail">
+                    <img src="${thumbnail}" alt="${video.title}" loading="lazy">
+                    <div class="video-duration">${video.duration}</div>
+                </div>
+                <div class="video-info">
+                    <h3 class="video-title" title="${video.title}">${truncateText(video.title, 60)}</h3>
+                    <p class="video-channel">
+                        <i class="fas fa-user"></i>
+                        ${video.channel}
+                    </p>
+                    <button class="download-btn" onclick='downloadVideo(${JSON.stringify(video)})'>
+                        <i class="fas fa-download"></i>
+                        Descargar MP3
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Descargar video
+        async function downloadVideo(video) {
+            showDownloadModal(video.title);
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: video.id,
+                        title: video.title
+                    })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Error al descargar');
+                }
+
+                // Obtener el blob y descargarlo
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${sanitizeFilename(video.title)}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                hideDownloadModal();
+                showToast('¡Descarga completada con éxito!', 'success');
+            } catch (error) {
+                hideDownloadModal();
+                showToast('Error al descargar: ' + error.message, 'error');
+            }
+        }
+
+        // Utilidades
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            if (show) {
+                showElement('loadingSpinner');
+            } else {
+                hideElement('loadingSpinner');
+            }
+        }
+
+        function showDownloadModal(filename) {
+            const modal = document.getElementById('downloadModal');
+            const filenameEl = document.getElementById('downloadFilename');
+            filenameEl.textContent = truncateText(filename, 50);
+            modal.classList.remove('hidden');
+        }
+
+        function hideDownloadModal() {
+            const modal = document.getElementById('downloadModal');
+            modal.classList.add('hidden');
+        }
+
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        function sanitizeFilename(filename) {
+            return filename.replace(/[^\w\s-]/g, '').replace(/[-\s]+/g, '_').substring(0, 100);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            toast.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+    </script>
+</body>
+</html>

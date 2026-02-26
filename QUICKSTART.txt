@@ -1,0 +1,137 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│         🎵 YOUTUBE MP3 DOWNLOADER - INICIO RÁPIDO 🎵       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+📋 REQUISITOS PREVIOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Python 3.8 o superior
+✓ FFmpeg instalado
+
+🚀 INSTALACIÓN (3 PASOS):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  Instalar FFmpeg:
+
+    Ubuntu/Debian:
+    $ sudo apt update && sudo apt install ffmpeg -y
+
+    macOS:
+    $ brew install ffmpeg
+
+2️⃣  Ejecutar instalación automática:
+
+    $ chmod +x install.sh
+    $ ./install.sh
+
+3️⃣  Iniciar aplicación:
+
+    DESARROLLO:
+    $ source venv/bin/activate
+    $ python app.py
+
+    PRODUCCIÓN:
+    $ gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
+
+📍 ACCESO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Abre tu navegador en:
+👉 http://localhost:5000
+
+🔧 CONFIGURACIÓN ADICIONAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧹 Limpieza automática (recomendado):
+
+    $ crontab -e
+    
+    Agregar:
+    */5 * * * * find /tmp/youtube_downloads -type f -mmin +5 -delete
+
+🐳 Con Docker (opcional):
+
+    $ docker build -t youtube-downloader .
+    $ docker run -p 5000:5000 youtube-downloader
+
+⚙️  Servicio systemd (producción):
+
+    $ sudo cp youtube-downloader.service /etc/systemd/system/
+    $ sudo systemctl enable youtube-downloader
+    $ sudo systemctl start youtube-downloader
+
+📚 DOCUMENTACIÓN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 README.md           - Documentación completa
+🚀 DEPLOYMENT.md       - Guía de despliegue en producción
+📡 API_EXAMPLES.md     - Ejemplos de uso de la API
+🔧 app.py              - Código fuente del backend
+
+🎯 CARACTERÍSTICAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Búsqueda directa en YouTube
+✓ Descarga y conversión a MP3 (192kbps)
+✓ Sin almacenamiento en servidor
+✓ Eliminación automática de archivos temporales
+✓ Interfaz moderna y responsive
+✓ Modo oscuro incluido
+✓ Rate limiting (5 descargas/hora)
+✓ API REST simple
+
+⚠️  IMPORTANTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚖️  Solo para uso personal
+📜 Respeta los derechos de autor
+🚫 No distribuir música con copyright
+
+🆘 SOLUCIÓN DE PROBLEMAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Error: "FFmpeg not found"
+   → Verificar: ffmpeg -version
+   → Instalar según tu sistema operativo
+
+❌ Error: "Permission denied"
+   → sudo mkdir -p /tmp/youtube_downloads
+   → sudo chmod 777 /tmp/youtube_downloads
+
+❌ Puerto 5000 ocupado
+   → Cambiar puerto en app.py: app.run(port=8000)
+
+💡 TIPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+→ Usa términos específicos en búsquedas
+→ Limita a canciones cortas (< 10 min)
+→ Configura cron job para limpieza automática
+→ Usa Nginx como reverse proxy en producción
+→ Habilita SSL con Let's Encrypt
+
+📊 VERIFICAR ESTADO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Health check:
+$ curl http://localhost:5000/api/health
+
+Ver archivos temporales:
+$ ls -lh /tmp/youtube_downloads/
+
+📞 SOPORTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¿Problemas? Revisa:
+1. README.md (sección "Solución de Problemas")
+2. Logs: sudo journalctl -u youtube-downloader -f
+3. Errores de Python: Ver consola del servidor
+
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│              🎉 ¡Listo para descargar música! 🎉           │
+│                                                             │
+│         Accede a: http://localhost:5000                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
