@@ -1,0 +1,115 @@
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│       🔐 CONFIGURAR YOUTUBE COOKIES EN RAILWAY - 3 PASOS      │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+⚡ OPCIÓN RÁPIDA (RECOMENDADA):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔗 PASO 1: Instalar Extensión del Navegador
+
+Elige tu navegador:
+
+  • Chrome/Edge: https://chromewebstore.google.com/detail/get-cookiestxt-locally/bgaddhkoddajcdgocldbbfleckgcige
+  • Firefox: https://addons.mozilla.org/es/firefox/addon/cookies-txt/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 PASO 2: Extraer Cookies
+
+1. Abre YouTube en tu navegador
+2. Loguéate en tu cuenta (si es necesario)
+3. Click en el icono de la extensión
+4. Click en "Export" o "Get cookies"
+5. Se descarga automáticamente: cookies.txt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚂 PASO 3: Agregar a Railway
+
+1. Abre el archivo cookies.txt con un editor de texto
+   (Bloc de notas, VSCode, etc.)
+
+2. COPIA TODO el contenido (Ctrl+A, Ctrl+C)
+
+3. Ve a Railway:
+   • Tu proyecto → Variables (o Settings)
+   • Click "Add Variable"
+   • Name: YOUTUBE_COOKIES
+   • Value: (PEGA el contenido completo aquí)
+   • Click "Add"
+
+4. Railway redesplegará automáticamente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ ¡LISTO!
+
+La app ahora usará tus cookies de YouTube para descargar música sin
+problemas de "bot detection".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 DETALLE TÉCNICO:
+
+El archivo cookies.txt se verá así:
+
+  # Netscape HTTP Cookie File
+  .youtube.com	TRUE	/	TRUE	0	VISITOR_INFO1_LIVE	xxxxx
+  .youtube.com	TRUE	/	TRUE	0	CONSISTENCY	xxxxx
+  ...
+
+Copia EXACTAMENTE como está.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 ESPERA DESPUÉS DE AGREGAR LA VARIABLE:
+
+Railroad tardará 2-5 minutos en redeplegar.
+
+Puedes ver el progreso en:
+  Deployments → Verás "Building..." y luego "Active"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 VERIFICA QUE FUNCIONA:
+
+1. Abre tu app en Railway
+2. Busca una canción
+3. Intenta descargar
+4. ¡Debería funcionar sin errores de bot!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ SI NO FUNCIONA AÚN:
+
+• Las cookies expiran después de cierto tiempo
+• Necesitarás extraer e instalar cookies nuevas
+• Repite los pasos 2 y 3
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 ALTERNATIVA (Sin cookies):
+
+Si no quieres usar cookies, simplemente espera. YouTube eventualmente
+permitirá descargas sin cookies después de varios reintentos.
+
+Pero usar cookies es lo más rápido y confiable.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 SOPORTE:
+
+¿Problemas? Revisa:
+
+1. Que el archivo cookies.txt se copió correctamente
+2. Que la variable YOUTUBE_COOKIES está en Railway
+3. Que Railway terminó de redeplegar (status "Active")
+4. Intenta extraer cookies nuevas (pueden haber expirado)
+
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│           🚀 ¡Sigue estos 3 pasos y funcionará! 🚀            │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
