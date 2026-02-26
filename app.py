@@ -153,6 +153,19 @@ def download():
         # Generar nombre temporal único
         temp_id = f"{int(time.time())}_{random.randint(1000, 9999)}"
         
+        # Crear cookies file si está disponible en variables de entorno
+        cookies_file = None
+        youtube_cookies = os.environ.get('YOUTUBE_COOKIES', '')
+        
+        if youtube_cookies:
+            cookies_file = f'{TEMP_DIR}/cookies_{temp_id}.txt'
+            try:
+                with open(cookies_file, 'w') as f:
+                    f.write(youtube_cookies)
+            except Exception as e:
+                print(f"Error escribiendo cookies: {e}")
+                cookies_file = None
+        
         # Opciones de descarga
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -189,6 +202,10 @@ def download():
             'youtube_include_hls_manifest': False,
         }
         
+        # Agregar cookies si están disponibles
+        if cookies_file:
+            ydl_opts['cookiefile'] = cookies_file
+        
         # Descargar y convertir
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -199,6 +216,7 @@ def download():
         # Verificar que el archivo existe
         if not os.path.exists(mp3_file):
             return jsonify({'error': 'Error al generar el archivo MP3'}), 500
+        
         
         # Nombre limpio para el archivo
         clean_title = sanitize_filename(title)
@@ -211,8 +229,12 @@ def download():
                 if os.path.exists(mp3_file):
                     os.remove(mp3_file)
                     print(f"Archivo eliminado: {mp3_file}")
+                # Eliminar también archivo de cookies si existe
+                if cookies_file and os.path.exists(cookies_file):
+                    os.remove(cookies_file)
+                    print(f"Cookies eliminadas: {cookies_file}")
             except Exception as e:
-                print(f"Error al eliminar archivo: {e}")
+                print(f"Error al eliminar archivos: {e}")
             return response
         
         # Enviar archivo al usuario
