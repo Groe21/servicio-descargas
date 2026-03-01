@@ -170,18 +170,31 @@
             const card = document.createElement('div');
             card.className = 'video-card';
             
-            const thumbnail = video.thumbnail || 'https://via.placeholder.com/320x180?text=No+Image';
+            // Asegurar que la thumbnail sea válida
+            let thumbnail = video.thumbnail || '';
+            
+            // Si no hay thumbnail o está vacía, usar placeholder
+            if (!thumbnail || thumbnail === '') {
+                thumbnail = 'https://img.youtube.com/vi/' + video.id + '/hqdefault.jpg';
+            }
+            
+            // Sanitizar el título para HTML
+            const safeTitle = video.title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const safeChannel = video.channel.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             
             card.innerHTML = `
                 <div class="video-thumbnail">
-                    <img src="${thumbnail}" alt="${video.title}" loading="lazy">
+                    <img src="${thumbnail}" 
+                         alt="${safeTitle}" 
+                         loading="lazy"
+                         onerror="this.src='https://img.youtube.com/vi/${video.id}/hqdefault.jpg'">
                     <div class="video-duration">${video.duration}</div>
                 </div>
                 <div class="video-info">
-                    <h3 class="video-title" title="${video.title}">${truncateText(video.title, 60)}</h3>
+                    <h3 class="video-title" title="${safeTitle}">${truncateText(video.title, 60)}</h3>
                     <p class="video-channel">
                         <i class="fas fa-user"></i>
-                        ${video.channel}
+                        ${safeChannel}
                     </p>
                     <button class="download-btn" onclick='downloadVideo(${JSON.stringify(video)})'>
                         <i class="fas fa-download"></i>

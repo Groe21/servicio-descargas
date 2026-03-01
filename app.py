@@ -144,14 +144,31 @@ def search():
                     if duration > MAX_DURATION:
                         continue
                     
+                    # Obtener la mejor thumbnail disponible
+                    video_id = entry.get('id', '')
+                    thumbnails = entry.get('thumbnails', [])
+                    
+                    # Construir URL de thumbnail de alta calidad
+                    thumbnail_url = f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg'
+                    
+                    # Si hay thumbnails disponibles, usar la de mejor calidad
+                    if thumbnails and len(thumbnails) > 0:
+                        # Buscar maxresdefault, sddefault, o hqdefault
+                        for thumb in reversed(thumbnails):
+                            if thumb.get('url'):
+                                thumbnail_url = thumb['url']
+                                break
+                    elif entry.get('thumbnail'):
+                        thumbnail_url = entry.get('thumbnail')
+                    
                     videos.append({
-                        'id': entry.get('id', ''),
-                        'url': entry.get('url', ''),
+                        'id': video_id,
+                        'url': entry.get('url', f'https://www.youtube.com/watch?v={video_id}'),
                         'title': entry.get('title', 'Sin título'),
-                        'channel': entry.get('uploader', entry.get('channel', 'Desconocido')),
+                        'channel': entry.get('uploader', entry.get('channel', entry.get('uploader_id', 'Desconocido'))),
                         'duration': format_duration(duration),
                         'duration_seconds': duration,
-                        'thumbnail': entry.get('thumbnail', ''),
+                        'thumbnail': thumbnail_url,
                         'view_count': entry.get('view_count', 0)
                     })
             
