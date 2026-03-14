@@ -211,7 +211,6 @@ def search():
 
 
 @app.route('/api/download', methods=['POST'])
-@rate_limiter(max_requests=5, window=3600)
 def download():
     """Descargar y convertir video a MP3"""
     cleanup_old_files()  # Limpiar archivos antiguos antes de descargar
