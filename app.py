@@ -255,7 +255,7 @@ def download():
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             'referer': 'https://www.youtube.com/',
             'nocheckcertificate': True,
             'extractor_retries': 5,
@@ -263,20 +263,19 @@ def download():
             'socket_timeout': 30,
             'skip_unavailable_fragments': True,
             'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Accept-Encoding': 'gzip, deflate, br',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Cache-Control': 'max-age=0',
+                'Referer': 'https://www.youtube.com/',
             },
             'geo_bypass': True,
             'geo_bypass_country': 'US',
-            'youtube_include_dash_manifest': False,
-            'youtube_include_hls_manifest': False,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['mediaconnect'],
+                }
+            },
         }
         
         # Agregar cookies si están disponibles
