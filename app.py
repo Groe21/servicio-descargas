@@ -2,6 +2,8 @@ import os
 import time
 import random
 import re
+import json
+import urllib.request
 from flask import Flask, render_template, request, jsonify, send_file, after_this_request
 from flask_cors import CORS
 import yt_dlp
@@ -71,6 +73,126 @@ def index():
     return render_template('index.html')
 
 
+def parse_duration_text(text):
+    """Convierte '3:45' o '1:02:30' a segundos"""
+    if not text:
+        return 0
+    parts = text.split(':')
+    try:
+        if len(parts) == 3:
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+        elif len(parts) == 2:
+            return int(parts[0]) * 60 + int(parts[1])
+        return 0
+    except (ValueError, IndexError):
+        return 0
+
+
+def innertube_search(query, max_results=20):
+    """Buscar en YouTube usando la API innertube directamente"""
+    url = "https://www.youtube.com/youtubei/v1/search"
+    
+    payload = {
+        "context": {
+            "client": {
+                "clientName": "WEB",
+                "clientVersion": "2.20241120.01.00",
+                "hl": "es",
+                "gl": "US",
+            }
+        },
+        "query": query,
+    }
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Referer': 'https://www.youtube.com/',
+        'Origin': 'https://www.youtube.com',
+    }
+    
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode('utf-8'),
+        headers=headers,
+        method='POST'
+    )
+    
+    with urllib.request.urlopen(req, timeout=30) as response:
+        result = json.loads(response.read().decode('utf-8'))
+    
+    videos = []
+    
+    # Navegar la estructura de respuesta de innertube
+    try:
+        contents = result['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents']
+    except (KeyError, TypeError):
+        return videos
+    
+    for section in contents:
+        items = section.get('itemSectionRenderer', {}).get('contents', [])
+        for item in items:
+            renderer = item.get('videoRenderer')
+            if not renderer:
+                continue
+            
+            video_id = renderer.get('videoId', '')
+            if not video_id:
+                continue
+            
+            # Título
+            title = 'Sin título'
+            title_runs = renderer.get('title', {}).get('runs', [])
+            if title_runs:
+                title = title_runs[0].get('text', 'Sin título')
+            
+            # Canal
+            channel = 'Desconocido'
+            channel_runs = renderer.get('ownerText', {}).get('runs', [])
+            if channel_runs:
+                channel = channel_runs[0].get('text', 'Desconocido')
+            
+            # Duración
+            duration_text = renderer.get('lengthText', {}).get('simpleText', '0:00')
+            duration_seconds = parse_duration_text(duration_text)
+            
+            # Filtrar videos muy largos
+            if duration_seconds > MAX_DURATION:
+                continue
+            
+            # Thumbnail
+            thumbnail_url = f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg'
+            thumbs = renderer.get('thumbnail', {}).get('thumbnails', [])
+            if thumbs:
+                thumbnail_url = thumbs[-1].get('url', thumbnail_url)
+            
+            # View count
+            view_count = 0
+            view_text = renderer.get('viewCountText', {}).get('simpleText', '')
+            if view_text:
+                numbers = re.sub(r'[^\d]', '', view_text)
+                if numbers:
+                    view_count = int(numbers)
+            
+            videos.append({
+                'id': video_id,
+                'url': f'https://www.youtube.com/watch?v={video_id}',
+                'title': title,
+                'channel': channel,
+                'duration': duration_text if duration_text != '0:00' else format_duration(duration_seconds),
+                'duration_seconds': duration_seconds,
+                'thumbnail': thumbnail_url,
+                'view_count': view_count
+            })
+            
+            if len(videos) >= max_results:
+                break
+        if len(videos) >= max_results:
+            break
+    
+    return videos
+
+
 @app.route('/api/search', methods=['POST'])
 def search():
     """Buscar videos en YouTube"""
@@ -81,101 +203,11 @@ def search():
         if not query:
             return jsonify({'error': 'Query vacío'}), 400
         
-        # Crear cookies file si está disponible en variables de entorno
-        cookies_file = None
-        youtube_cookies = os.environ.get('YOUTUBE_COOKIES', '')
-        
-        if youtube_cookies:
-            temp_id = f"{int(time.time())}_{random.randint(1000, 9999)}"
-            cookies_file = f'{TEMP_DIR}/search_cookies_{temp_id}.txt'
-            try:
-                with open(cookies_file, 'w') as f:
-                    f.write(youtube_cookies)
-            except Exception as e:
-                print(f"Error escribiendo cookies para búsqueda: {e}")
-                cookies_file = None
-        
-        # Opciones de búsqueda con yt-dlp
-        ydl_opts = {
-            'quiet': True,
-            'no_warnings': True,
-            'extract_flat': 'in_playlist',
-            'force_generic_extractor': False,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            'geo_bypass': True,
-            'socket_timeout': 30,
-            'extractor_retries': 3,
-            'nocheckcertificate': True,
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Referer': 'https://www.youtube.com/',
-            },
-        }
-        
-        # Agregar cookies si están disponibles
-        if cookies_file:
-            ydl_opts['cookiefile'] = cookies_file
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Buscar en YouTube
-            search_query = f"ytsearch20:{query}"
-            result = ydl.extract_info(search_query, download=False)
-            
-            if not result or 'entries' not in result:
-                return jsonify({'results': []})
-            
-            # Formatear resultados
-            videos = []
-            for entry in result['entries']:
-                if entry:
-                    duration = entry.get('duration', 0)
-                    
-                    # Filtrar videos muy largos
-                    if duration > MAX_DURATION:
-                        continue
-                    
-                    # Obtener la mejor thumbnail disponible
-                    video_id = entry.get('id', '')
-                    thumbnails = entry.get('thumbnails', [])
-                    
-                    # Construir URL de thumbnail de alta calidad
-                    thumbnail_url = f'https://i.ytimg.com/vi/{video_id}/hqdefault.jpg'
-                    
-                    # Si hay thumbnails disponibles, usar la de mejor calidad
-                    if thumbnails and len(thumbnails) > 0:
-                        # Buscar maxresdefault, sddefault, o hqdefault
-                        for thumb in reversed(thumbnails):
-                            if thumb.get('url'):
-                                thumbnail_url = thumb['url']
-                                break
-                    elif entry.get('thumbnail'):
-                        thumbnail_url = entry.get('thumbnail')
-                    
-                    videos.append({
-                        'id': video_id,
-                        'url': entry.get('url', f'https://www.youtube.com/watch?v={video_id}'),
-                        'title': entry.get('title', 'Sin título'),
-                        'channel': entry.get('uploader', entry.get('channel', entry.get('uploader_id', 'Desconocido'))),
-                        'duration': format_duration(duration),
-                        'duration_seconds': duration,
-                        'thumbnail': thumbnail_url,
-                        'view_count': entry.get('view_count', 0)
-                    })
-            
-            return jsonify({'results': videos[:20]})
+        videos = innertube_search(query, max_results=20)
+        return jsonify({'results': videos})
     
     except Exception as e:
         return jsonify({'error': f'Error en búsqueda: {str(e)}'}), 500
-    finally:
-        # Limpiar archivo de cookies si existe
-        if 'cookies_file' in locals() and cookies_file and os.path.exists(cookies_file):
-            try:
-                os.remove(cookies_file)
-            except:
-                pass
 
 
 @app.route('/api/download', methods=['POST'])
